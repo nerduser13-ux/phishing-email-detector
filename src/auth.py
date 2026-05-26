@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, abort
 from flask_login import login_user, logout_user, login_required, current_user
 from models import db, User
 import bcrypt
@@ -57,7 +57,7 @@ def register():
 
 @auth.route('/setup-2fa/<int:user_id>')
 def setup_2fa(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id) or abort(404)
     otp_uri = pyotp.totp.TOTP(user.otp_secret).provisioning_uri(
         name=user.email,
         issuer_name='PhishingDetector'
@@ -73,7 +73,7 @@ def setup_2fa(user_id):
 
 @auth.route('/verify-2fa-setup/<int:user_id>', methods=['POST'])
 def verify_2fa_setup(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id) or abort(404)
     token = request.form.get('token')
     totp = pyotp.TOTP(user.otp_secret)
 
@@ -116,7 +116,7 @@ def verify_2fa():
     if not user_id:
         return redirect(url_for('auth.login'))
 
-    user = User.query.get_or_404(user_id)
+    user = db.session.get(User, user_id) or abort(404)
 
     if request.method == 'POST':
         token = request.form.get('token')
