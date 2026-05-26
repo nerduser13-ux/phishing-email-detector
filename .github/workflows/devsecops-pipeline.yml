@@ -73,11 +73,71 @@ jobs:
       - name: Run dependency scan
         run: pip-audit || true
 
-  # ---- STAGE 4: TESTS ----
+  # ---- STAGE 4: DAST - OWASP ZAP ----
+  dast:
+    name: DAST - OWASP ZAP Scan
+    runs-on: ubuntu-latest
+    needs: dependency-scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create test database and start app
+        run: |
+          cd src
+          python -c "
+          from app import create_app
+          from models import db
+          import bcrypt, pyotp
+          app = create_app()
+          with app.app_context():
+              db.create_all()
+              from models import User
+              if not User.query.filter_by(email='zap@test.com').first():
+                  pw = bcrypt.hashpw(b'ZapTest@1234', bcrypt.gensalt()).decode('utf-8')
+                  u = User(username='zapuser', email='zap@test.com',
+                           password_hash=pw, role='analyst',
+                           otp_secret=pyotp.random_base32(), is_2fa_enabled=False)
+                  db.session.add(u)
+                  db.session.commit()
+          "
+          nohup python app.py &
+          sleep 5
+          echo "App started"
+
+      - name: Verify app is running
+        run: |
+          curl -s http://127.0.0.1:5000/login | grep -i "login" && echo "App is UP" || echo "App not responding"
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: "http://127.0.0.1:5000"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"
+          fail_action: false
+          allow_issue_writing: false
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: zap-security-report
+          path: report_html.html
+
+  # ---- STAGE 5: TESTS ----
   test:
     name: Automated Tests
     runs-on: ubuntu-latest
-    needs: sast
+    needs: dast
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -95,7 +155,7 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v --tb=short
 
-  # ---- STAGE 5: DEPLOY (Simulated) ----
+  # ---- STAGE 6: DEPLOY (Simulated) ----
   deploy:
     name: Deploy to Staging
     runs-on: ubuntu-latest
