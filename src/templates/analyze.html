@@ -1,46 +1,130 @@
 {% extends 'base.html' %} {% block content %}
 <div class="card">
   <h2>🔍 Analyze Email</h2>
-  <form method="POST">
-    <div class="form-group">
-      <label>Email Subject</label>
-      <input
-        type="text"
-        name="subject"
-        required
-        placeholder="e.g. Urgent: Verify your account now"
-      />
-    </div>
-    <div class="form-group">
-      <label>Sender Email</label>
-      <input
-        type="text"
-        name="sender"
-        required
-        placeholder="e.g. support@paypa1.com"
-      />
-    </div>
-    <div class="form-group">
-      <label>Reply-To Email (if different)</label>
-      <input type="text" name="reply_to" placeholder="e.g. harvest@evil.tk" />
-    </div>
-    <div class="form-group">
-      <label>Email Body</label>
-      <textarea
-        name="body"
-        required
-        placeholder="Paste the full email body here..."
-      ></textarea>
-    </div>
-    <div class="form-group">
-      <label>Attachments (comma separated filenames, if any)</label>
-      <input
-        type="text"
-        name="attachments"
-        placeholder="e.g. invoice.exe, document.docm"
-      />
-    </div>
-    <button type="submit" class="btn btn-primary">Analyze Email</button>
-  </form>
+
+  <!-- Tab Buttons -->
+  <div style="margin-bottom: 20px">
+    <button
+      onclick="showTab('manual')"
+      id="btn-manual"
+      style="
+        padding: 8px 20px;
+        margin-right: 10px;
+        background: #3182ce;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      "
+    >
+      Manual Entry
+    </button>
+    <button
+      onclick="showTab('raw')"
+      id="btn-raw"
+      style="
+        padding: 8px 20px;
+        background: #2d3748;
+        color: #a0aec0;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      "
+    >
+      Paste Raw Email
+    </button>
+  </div>
+
+  <!-- Manual Entry Form -->
+  <div id="tab-manual">
+    <form method="POST">
+      <input type="hidden" name="form_type" value="manual" />
+      <div class="form-group">
+        <label>Email Subject</label>
+        <input
+          type="text"
+          name="subject"
+          required
+          placeholder="e.g. Urgent: Verify your account now"
+        />
+      </div>
+      <div class="form-group">
+        <label>Sender Email</label>
+        <input
+          type="text"
+          name="sender"
+          required
+          placeholder="e.g. support@paypa1.com"
+        />
+      </div>
+      <div class="form-group">
+        <label>Reply-To Email (if different)</label>
+        <input type="text" name="reply_to" placeholder="e.g. harvest@evil.tk" />
+      </div>
+      <div class="form-group">
+        <label>Email Body</label>
+        <textarea
+          name="body"
+          required
+          placeholder="Paste the full email body here..."
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label>Attachments (comma separated filenames, if any)</label>
+        <input
+          type="text"
+          name="attachments"
+          placeholder="e.g. invoice.exe, document.docm"
+        />
+      </div>
+      <button type="submit" class="btn btn-primary">Analyze Email</button>
+    </form>
+  </div>
+
+  <!-- Raw Email Form -->
+  <div id="tab-raw" style="display: none">
+    <p style="color: #a0aec0; font-size: 13px; margin-bottom: 16px">
+      Paste the complete raw email including all headers and body. The system
+      will automatically extract all fields.
+    </p>
+    <form method="POST">
+      <input type="hidden" name="form_type" value="raw" />
+      <div class="form-group">
+        <label>Paste Raw Email</label>
+        <textarea
+          name="raw_email"
+          required
+          style="min-height: 300px; font-family: monospace; font-size: 12px"
+          placeholder="From: sender@example.com
+To: victim@example.com
+Subject: Urgent Notice
+Reply-To: attacker@evil.tk
+Date: Mon, 26 May 2026 10:00:00 +0000
+
+Dear customer, paste full email here..."
+        ></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Parse & Analyze</button>
+    </form>
+  </div>
 </div>
+
+<script>
+  function showTab(tab) {
+    document.getElementById("tab-manual").style.display =
+      tab === "manual" ? "block" : "none";
+    document.getElementById("tab-raw").style.display =
+      tab === "raw" ? "block" : "none";
+    document.getElementById("btn-manual").style.background =
+      tab === "manual" ? "#3182ce" : "#2d3748";
+    document.getElementById("btn-manual").style.color =
+      tab === "manual" ? "white" : "#a0aec0";
+    document.getElementById("btn-raw").style.background =
+      tab === "raw" ? "#3182ce" : "#2d3748";
+    document.getElementById("btn-raw").style.color =
+      tab === "raw" ? "white" : "#a0aec0";
+  }
+</script>
 {% endblock %}
