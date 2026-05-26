@@ -18,23 +18,43 @@ This tool analyzes emails and identifies phishing attempts using:
 
 ## 🏗️ Project Structure
 
+```
 phishing-email-detector/
-├── src/ # Source code
-│ ├── app.py # Main Flask application
-│ ├── auth.py # Authentication routes (login, register, 2FA)
-│ ├── main.py # Dashboard, history, quarantine routes
-│ ├── analyze.py # Email analysis routes
-│ ├── detector.py # Phishing detection engine
-│ ├── models.py # Database models
-│ ├── config.py # App configuration
-│ └── templates/ # HTML templates
-├── tests/ # Automated tests
-│ └── test_detector.py # Unit tests for detection engine
-├── docs/ # Documentation
-├── ci-cd/ # Pipeline reference files
-├── .github/workflows/ # GitHub Actions CI/CD pipeline
-├── requirements.txt # Python dependencies
+├── src/                         # Source code
+│   ├── app.py                   # Main Flask application
+│   ├── auth.py                  # Authentication routes (login, register, 2FA)
+│   ├── main.py                  # Dashboard, history, quarantine routes
+│   ├── analyze.py               # Email analysis routes
+│   ├── detector.py              # Phishing detection engine
+│   ├── models.py                # Database models
+│   ├── config.py                # App configuration
+│   ├── export.py                # PDF export feature
+│   └── templates/               # HTML templates
+│       ├── base.html
+│       ├── login.html
+│       ├── register.html
+│       ├── setup_2fa.html
+│       ├── verify_2fa.html
+│       ├── dashboard.html
+│       ├── analyze.html
+│       ├── result.html
+│       ├── history.html
+│       └── quarantine.html
+├── tests/                       # Automated tests
+│   └── test_detector.py         # Unit tests for detection engine
+├── docs/                        # Documentation
+│   └── architecture.md
+├── ci-cd/                       # Pipeline reference files
+│   └── devsecops-pipeline.yml
+├── .github/
+│   └── workflows/
+│       └── devsecops-pipeline.yml  # GitHub Actions CI/CD pipeline
+├── .zap/
+│   └── rules.tsv                # OWASP ZAP ignore rules
+├── .gitignore
+├── requirements.txt             # Python dependencies
 └── README.md
+```
 
 ## ⚙️ Setup Instructions
 
