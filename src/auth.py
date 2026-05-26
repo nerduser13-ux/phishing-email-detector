@@ -19,8 +19,14 @@ def register():
 
         # Check if user exists
         existing_user = User.query.filter_by(email=email).first()
+        existing_username = User.query.filter_by(username=username).first()
+
         if existing_user:
             flash('Email already registered.', 'danger')
+            return redirect(url_for('auth.register'))
+
+        if existing_username:
+            flash('Username already taken. Choose another.', 'danger')
             return redirect(url_for('auth.register'))
 
         # Hash password

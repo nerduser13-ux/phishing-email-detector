@@ -167,10 +167,16 @@ def analyze_email(subject, sender, reply_to, body, attachments):
     if not findings:
         findings.append('No phishing indicators detected.')
 
-    # ---- DETERMINE RISK LEVEL ----
+# ---- DETERMINE RISK LEVEL ----
     if score >= 50:
         risk_level = 'RED'
     elif score >= 20:
         risk_level = 'YELLOW'
     else:
+        risk_level = 'GREEN'
 
+    return {
+        'risk_level': risk_level,
+        'risk_score': min(score, 100),
+        'findings': findings
+    }
