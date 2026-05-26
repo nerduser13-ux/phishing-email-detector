@@ -11,6 +11,7 @@
         <th style="padding: 10px; text-align: left">Risk</th>
         <th style="padding: 10px; text-align: left">Score</th>
         <th style="padding: 10px; text-align: left">Date</th>
+        <th style="padding: 10px; text-align: left">Export</th>
       </tr>
     </thead>
     <tbody>
@@ -34,6 +35,15 @@
         <td style="padding: 10px; color: #a0aec0">
           {{ log.analyzed_at.strftime('%Y-%m-%d %H:%M') }}
         </td>
+        <td style="padding: 10px">
+          <a
+            href="{{ url_for('export.export_pdf', log_id=log.id) }}"
+            class="btn btn-primary"
+            style="padding: 5px 12px; font-size: 12px"
+          >
+            📄 PDF
+          </a>
+        </td>
       </tr>
       {% endfor %}
     </tbody>
@@ -42,4 +52,3 @@
   <p style="color: #a0aec0">No history found.</p>
   {% endif %}
 </div>
-{% endblock %}

@@ -29,6 +29,9 @@ def create_app():
     from analyze import analyze as analyze_blueprint
     app.register_blueprint(analyze_blueprint)
 
+    from export import export as export_blueprint
+    app.register_blueprint(export_blueprint)
+
     # Create database tables
     with app.app_context():
         db.create_all()
