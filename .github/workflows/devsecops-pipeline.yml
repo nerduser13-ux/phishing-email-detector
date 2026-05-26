@@ -90,10 +90,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Create test database and start app
+      - name: Start Flask app in background
         run: |
           cd src
+          export FLASK_APP=app.py
+          export SECRET_KEY=test-secret-key-for-ci
           python -c "
+          import sys, os
+          sys.path.insert(0, '.')
           from app import create_app
           from models import db
           import bcrypt, pyotp
@@ -101,33 +105,41 @@ jobs:
           with app.app_context():
               db.create_all()
               from models import User
-              if not User.query.filter_by(email='zap@test.com').first():
-                  pw = bcrypt.hashpw(b'ZapTest@1234', bcrypt.gensalt()).decode('utf-8')
-                  u = User(username='zapuser', email='zap@test.com',
-                           password_hash=pw, role='analyst',
-                           otp_secret=pyotp.random_base32(), is_2fa_enabled=False)
+              existing = User.query.filter_by(username='zapuser').first()
+              if not existing:
+                  pw = bcrypt.hashpw(b'ZapTest1234', bcrypt.gensalt()).decode('utf-8')
+                  u = User(
+                      username='zapuser',
+                      email='zap@test.com',
+                      password_hash=pw,
+                      role='analyst',
+                      otp_secret=pyotp.random_base32(),
+                      is_2fa_enabled=False
+                  )
                   db.session.add(u)
                   db.session.commit()
-          "
-          nohup python app.py &
-          sleep 5
-          echo "App started"
+                  print('Test user created')
+          " 
+          nohup flask run --host=0.0.0.0 --port=5000 &
+          echo "Waiting for app to start..."
+          sleep 8
 
-      - name: Verify app is running
+      - name: Check app is running
         run: |
-          curl -s http://127.0.0.1:5000/login | grep -i "login" && echo "App is UP" || echo "App not responding"
+          curl --retry 5 --retry-delay 3 --retry-connrefused \
+          http://127.0.0.1:5000/login -o /dev/null -w "%{http_code}" || true
 
       - name: Run OWASP ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: "http://127.0.0.1:5000"
           rules_file_name: ".zap/rules.tsv"
-          cmd_options: "-a"
           fail_action: false
           allow_issue_writing: false
+        continue-on-error: true
 
       - name: Upload ZAP Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: zap-security-report

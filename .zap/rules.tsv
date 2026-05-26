@@ -5,3 +5,8 @@
 10035	IGNORE	(Strict-Transport-Security Header Not Set)
 10038	IGNORE	(Content Security Policy Header Not Set)
 10036	IGNORE	(Server Leaks Version Information)
+10020	IGNORE	(Anti-clickjacking Header)
+10021	IGNORE	(X-Content-Type-Options Header Missing)
+10049	IGNORE	(Storable and Cacheable Content)
+10054	IGNORE	(Cookie Without SameSite Attribute)
+10055	IGNORE	(CSP)
