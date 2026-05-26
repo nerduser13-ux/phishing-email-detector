@@ -1,0 +1,56 @@
+{% extends 'base.html' %} {% block content %}
+<div class="card" style="text-align: center">
+  {% if result.risk_level == 'RED' %}
+  <div style="font-size: 60px">🔴</div>
+  <h2 style="color: #fc8181; font-size: 28px">HIGH RISK — PHISHING DETECTED</h2>
+  <p style="color: #a0aec0; margin-top: 8px">
+    This email has been automatically quarantined.
+  </p>
+  {% elif result.risk_level == 'YELLOW' %}
+  <div style="font-size: 60px">🟡</div>
+  <h2 style="color: #f6e05e; font-size: 28px">
+    MEDIUM RISK — SUSPICIOUS EMAIL
+  </h2>
+  <p style="color: #a0aec0; margin-top: 8px">Treat this email with caution.</p>
+  {% else %}
+  <div style="font-size: 60px">🟢</div>
+  <h2 style="color: #68d391; font-size: 28px">LOW RISK — EMAIL APPEARS SAFE</h2>
+  <p style="color: #a0aec0; margin-top: 8px">
+    No significant phishing indicators detected.
+  </p>
+  {% endif %}
+
+  <div style="margin-top: 16px; font-size: 32px; font-weight: bold">
+    Risk Score: {{ result.risk_score }}/100
+  </div>
+</div>
+
+<div class="card">
+  <h2>📋 Analysis Details</h2>
+  <p style="color: #a0aec0; margin-bottom: 6px; font-size: 13px">
+    Subject: {{ subject }} | Sender: {{ sender }}
+  </p>
+  <ul style="margin-top: 16px; padding-left: 20px">
+    {% for finding in result.findings %}
+    <li
+      style="margin-bottom:10px; font-size:14px;
+                       color:{% if 'detected' in finding.lower() %}#fc8181
+                              {% elif 'no phishing' in finding.lower() %}#68d391
+                              {% else %}#f6e05e{% endif %};"
+    >
+      {{ finding }}
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<a href="{{ url_for('analyze.analyze_email_route') }}" class="btn btn-primary"
+  >Analyze Another Email</a
+>
+<a
+  href="{{ url_for('main.dashboard') }}"
+  class="btn btn-success"
+  style="margin-left: 10px"
+  >Go to Dashboard</a
+>
+{% endblock %}
